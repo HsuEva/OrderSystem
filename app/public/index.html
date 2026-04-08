@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>團隊訂餐系統</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <nav class="navbar">
+      <h1>🍽 團隊訂餐系統</h1>
+      <ul>
+        <li><a href="#roster" onclick="showView('roster')">同事名單</a></li>
+        <li><a href="#sessions" onclick="showView('sessions')">訂餐活動</a></li>
+        <li><a href="#form" onclick="showView('form')">填寫訂單</a></li>
+        <li><a href="#stats" onclick="showView('stats')">統計查看</a></li>
+      </ul>
+    </nav>
+
+    <!-- Colleague Roster View -->
+    <div id="roster-view" class="view hidden">
+      <div class="container">
+        <h2>同事名單管理</h2>
+
+        <!-- Colleagues Section -->
+        <section class="section">
+          <h3>人員清單</h3>
+          <div class="form-group">
+            <input 
+              type="text" 
+              id="new-colleague-name" 
+              placeholder="人員姓名"
+            >
+            <input 
+              type="text" 
+              id="new-colleague-empid" 
+              placeholder="員工代號（可選）"
+            >
+            <button onclick="createColleague()">新增人員</button>
+          </div>
+          <div id="colleagues-list" class="list"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Sessions View -->
+    <div id="sessions-view" class="view hidden">
+      <div class="container">
+        <h2 id="sessions-header">訂餐活動管理</h2>
+        
+        <!-- Session Creation Panel -->
+        <div id="session-creation-panel" style="display: block;">
+          <section class="section">
+            <div class="form-group">
+              <input 
+                type="text" 
+                id="new-session-name" 
+                placeholder="活動名稱"
+              >
+              <input 
+                type="datetime-local" 
+                id="new-session-deadline"
+                placeholder="截止時間（可選）"
+              >
+              <button onclick="handleCreateSession()">建立活動</button>
+            </div>
+            <div id="sessions-list" class="list"></div>
+          </section>
+        </div>
+        
+        <!-- Session Configuration Panel -->
+        <div id="session-config-panel" style="display: none;">
+          <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 1rem;">
+            <button onclick="backToSessionList()" style="padding: 0.5rem 1rem; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer;">← 返回活動列表</button>
+            <h3 id="session-config-title" style="margin: 0;"></h3>
+          </div>
+
+          <section class="section">
+            <h4>活動截止時間</h4>
+            <div class="form-group">
+              <input type="datetime-local" id="edit-session-deadline" placeholder="截止時間（可選）" />
+              <button onclick="saveSessionDeadline()">保存截止時間</button>
+              <button onclick="clearSessionDeadline()" style="background:#95a5a6;">清除截止時間</button>
+            </div>
+          </section>
+
+          <section class="section">
+            <h4>填單限制與分享</h4>
+            <div class="form-group">
+              <label>食物最多：</label>
+              <input type="number" id="max-food-items" min="0" step="1" value="2" />
+              <label>份</label>
+            </div>
+            <div class="form-group">
+              <label>飲料最多：</label>
+              <input type="number" id="max-drink-items" min="0" step="1" value="1" />
+              <label>杯</label>
+            </div>
+            <div class="form-group">
+              <button onclick="saveSessionSettings()">保存限制</button>
+              <button onclick="copyFormOnlyLink()" style="background:#2ecc71;">複製填單連結</button>
+            </div>
+            <p id="share-link-hint" style="margin:0.5rem 0 0; color:#666; font-size:0.9rem;"></p>
+          </section>
+          
+          <!-- Menu Items Section -->
+          <section class="section">
+            <h4>菜單設定</h4>
+            <div class="form-group">
+              <input type="text" id="new-food-name" placeholder="食物名稱" />
+              <button onclick="addFoodItem()">新增食物</button>
+            </div>
+            <div id="food-items-list" class="list"></div>
+            
+            <div class="form-group" style="margin-top: 1.5rem;">
+              <input type="text" id="new-drink-name" placeholder="飲料名稱" />
+              <button onclick="addDrinkItem()">新增飲料</button>
+            </div>
+            <div id="drink-items-list" class="list"></div>
+            
+            <div style="margin-top: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef;">
+              <p style="margin: 0 0 0.5rem; font-size: 0.85rem; color: #6c757d;">飲料甜度 / 冰塊選項</p>
+              <div class="form-group">
+                <label>甜度：</label>
+                <input type="text" id="sweetness-input" placeholder="甜度選項，逗號分隔" value="全糖,半糖,無糖" />
+                <button onclick="updateSweetnessOptions()">保存</button>
+              </div>
+              <div class="form-group">
+                <label>冰塊：</label>
+                <input type="text" id="ice-input" placeholder="冰塊選項，逗號分隔" value="常溫,去冰,少冰,正常,多冰" />
+                <button onclick="updateIceOptions()">保存</button>
+              </div>
+            </div>
+          </section>
+          
+          <!-- Colleague Assignment -->
+          <section class="section">
+            <h4>指派人員</h4>
+            <div class="form-group">
+              <label>選擇參與此活動的人員：</label>
+              <div style="margin-bottom: 0.5rem;">
+                <button onclick="toggleSelectAllColleagues()" id="select-all-btn" style="padding: 0.3rem 0.75rem; font-size: 0.85rem; background: #ecf0f1; color: #333; border: 1px solid #bdc3c7; border-radius: 4px; cursor: pointer;">全選</button>
+              </div>
+              <div id="colleague-checkboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem; border-radius: 4px;"></div>
+              <button onclick="assignColleaguesToCurrentSession()" style="margin-top: 1rem;">確認指派</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form View -->
+    <div id="form-view" class="view hidden">
+      <div class="container">
+        <h2>填寫訂單</h2>
+        <section class="section">
+          <select id="session-selector" onchange="loadFormForSession()">
+            <option value="">選擇訂餐活動...</option>
+          </select>
+          <div id="form-content" style="display:none; margin-top: 20px;">
+            <h3 id="form-session-name"></h3>
+            <p id="form-limits-hint" style="color:#666; font-size:0.9rem;"></p>
+            <form id="order-form">
+              <div class="form-group">
+                <label>人員選擇：</label>
+                <select id="colleague-selector" required onchange="handleColleagueChange()">
+                  <option value="">選擇你的名字...</option>
+                </select>
+              </div>
+              <div id="menu-items-container"></div>
+              <button type="submit">提交訂單</button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Statistics View -->
+    <div id="stats-view" class="view hidden">
+      <div class="container">
+        <h2>統計查看</h2>
+        <section class="section">
+          <select id="stats-session-selector" onchange="loadStats()">
+            <option value="">選擇訂餐活動...</option>
+          </select>
+        </section>
+
+        <div id="stats-content" style="display:none;">
+          <!-- Submission status -->
+          <section class="section">
+            <h3>人員訂餐狀態</h3>
+            <div id="submission-status-list" class="list"></div>
+          </section>
+
+          <!-- Food summary -->
+          <section class="section">
+            <h3>食物統計</h3>
+            <div id="food-summary-list" class="list"></div>
+          </section>
+
+          <!-- Drink summary -->
+          <section class="section">
+            <h3>飲料統計</h3>
+            <div id="drink-summary-list" class="list"></div>
+          </section>
+
+          <div style="margin-top: 1rem;">
+            <button onclick="exportStatsCSV()" style="background: #27ae60;">匯出 CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
