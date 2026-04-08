@@ -1,0 +1,59 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+context: |
+  Project type: OpenSpec-driven planning workspace for proposing, refining, and implementing changes.
+  Primary output: Markdown and YAML artifacts under openspec/changes and openspec/specs.
+
+  Tech stack:
+  - OpenSpec CLI (spec-driven schema)
+  - YAML configuration (openspec/config.yaml)
+  - Markdown artifacts (proposal.md, design.md, tasks.md, spec.md)
+  - GitHub Copilot prompt/skill integration in .github/
+
+  Repository conventions:
+  - Use kebab-case for change names (example: add-user-auth).
+  - Keep artifacts concise, explicit, and implementation-oriented.
+  - Favor incremental, testable tasks over large one-shot tasks.
+  - Record assumptions and out-of-scope items explicitly.
+  - Prefer updating existing artifacts over duplicating decisions across files.
+
+  Writing conventions:
+  - Use clear headings and short sections.
+  - Use RFC 2119 language in specs when applicable (MUST/SHOULD/MAY).
+  - Include acceptance criteria for each requirement.
+  - Keep language concrete, avoid vague wording.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Include problem statement, goals, non-goals, and success criteria.
+    - Explain why now and expected impact.
+    - Keep scope realistic for one change.
+  design:
+    - Describe architecture decisions and trade-offs.
+    - List risks, mitigations, and rollback considerations.
+    - Prefer diagrams or structured bullet flows for complex behavior.
+  specs:
+    - Define requirements with clear acceptance criteria.
+    - Separate functional requirements from constraints.
+    - Avoid implementation details unless required for correctness.
+  tasks:
+    - Express tasks as small, verifiable steps.
+    - Include validation steps (tests/checks/review points).
+    - Mark dependencies when a task requires another task first.
